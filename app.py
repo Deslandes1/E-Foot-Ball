@@ -62,9 +62,10 @@ def move_player(direction):
         st.session_state.player_x += step
     
     # --- GOAL DETECTION LOGIC ---
+    # Detects if player enters the Golden Goal zone
     if st.session_state.player_x > 440 and 110 < st.session_state.player_y < 190:
         st.session_state.score += 1
-        st.session_state.player_x = 250  # Reset position
+        st.session_state.player_x = 250  
         st.session_state.player_y = 150
         st.balloons()
 
@@ -140,6 +141,6 @@ st.markdown("<br><hr>", unsafe_allow_html=True)
 st.markdown("""
     <div style="text-align:center; color: #888; font-family:monospace;">
         © 2026 GLOBALINTERNET.PY | DESIGNED BY GESNER DESLANDES<br>
-        <b>DEPLOYED FOR MOBILE & LAPTOP ACCESSIBILITY</b>
+        <b>OPTIMIZED FOR CROSS-PLATFORM PERFORMANCE</b>
     </div>
     """, unsafe_allow_html=True)

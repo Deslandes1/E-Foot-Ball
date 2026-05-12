@@ -30,7 +30,7 @@ st.markdown("""
     }
     /* Mobile-Friendly Button Styling */
     .stButton>button {
-        width: 100%; height: 60px; font-size: 24px !important;
+        width: 100%; height: 65px; font-size: 24px !important;
         font-weight: 900 !important; border-radius: 15px !important;
         background-color: #222 !important; color: gold !important;
         border: 2px solid #FFD700 !important;
@@ -48,12 +48,6 @@ if 'player_y' not in st.session_state:
     st.session_state.player_y = 150
 if 'score' not in st.session_state:
     st.session_state.score = 0
-if 'match_time' not in st.session_state:
-    st.session_state.match_time = 90
-
-# --- GAME HEADER ---
-st.markdown('<p class="game-title">E-FOOTBALL ENGINE</p>', unsafe_allow_html=True)
-st.markdown('<p class="dev-credit">ENGINEERED BY GESNER DESLANDES</p>', unsafe_allow_html=True)
 
 # --- GAME LOGIC FUNCTIONS ---
 def move_player(direction):
@@ -67,7 +61,7 @@ def move_player(direction):
     if direction == "RIGHT" and st.session_state.player_x < 470:
         st.session_state.player_x += step
     
-    # --- GOAL DETECTION (GOLD ZONE) ---
+    # --- GOAL DETECTION LOGIC ---
     if st.session_state.player_x > 440 and 110 < st.session_state.player_y < 190:
         st.session_state.score += 1
         st.session_state.player_x = 250  # Reset position
@@ -115,37 +109,37 @@ pitch_svg = f"""
 
 st.markdown(f'<div class="game-container">{pitch_svg}</div>', unsafe_allow_html=True)
 
-# --- LIVE SCOREBOARD ---
-c1, c2 = st.columns(2)
-with c1:
-    st.markdown(f"<h1 style='text-align:right; color:white;'>GOALS:</h1>", unsafe_allow_html=True)
-with c2:
-    st.markdown(f"<h1 style='text-align:left; color:#FFD700;'>{st.session_state.score}</h1>", unsafe_allow_html=True)
+# --- SCOREBOARD ---
+col_sc1, col_sc2 = st.columns(2)
+with col_sc1:
+    st.markdown("<h2 style='text-align:right; color:white; margin-top:10px;'>MATCH SCORE:</h2>", unsafe_allow_html=True)
+with col_sc2:
+    st.markdown(f"<h2 style='text-align:left; color:#FFD700; margin-top:10px;'>{st.session_state.score}</h2>", unsafe_allow_html=True)
 
-# --- MOBILE & LAPTOP CONTROLS ---
+# --- CONTROLS ---
 st.markdown("<br>", unsafe_allow_html=True)
-ctrl_up, ctrl_reset = st.columns([2, 1])
-with ctrl_up:
-    if st.button("🔼 MOVE UP"): move_player("UP")
-with ctrl_reset:
+c_up, c_res = st.columns([2, 1])
+with c_up:
+    if st.button("🔼 UP"): move_player("UP")
+with c_res:
     if st.button("🔄 RESET"): 
         st.session_state.score = 0
         st.session_state.player_x = 250
         st.session_state.player_y = 150
 
-ctrl_l, ctrl_d, ctrl_r = st.columns(3)
-with ctrl_l:
+c_l, c_d, c_r = st.columns(3)
+with c_l:
     if st.button("◀️ LEFT"): move_player("LEFT")
-with ctrl_d:
+with c_d:
     if st.button("🔽 DOWN"): move_player("DOWN")
-with ctrl_r:
+with c_r:
     if st.button("▶️ RIGHT"): move_player("RIGHT")
 
 # --- FOOTER ---
 st.markdown("<br><hr>", unsafe_allow_html=True)
 st.markdown("""
-    <div style="text-align:center; color: #555; font-weight:bold;">
-        © 2026 GLOBALINTERNET.PY | VERSION 2.0 HD<br>
-        PROUDLY DEVELOPED IN HAITI BY GESNER DESLANDES
+    <div style="text-align:center; color: #888; font-family:monospace;">
+        © 2026 GLOBALINTERNET.PY | DESIGNED BY GESNER DESLANDES<br>
+        <b>DEPLOYED FOR MOBILE & LAPTOP ACCESSIBILITY</b>
     </div>
     """, unsafe_allow_html=True)

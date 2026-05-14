@@ -6,41 +6,121 @@ from datetime import datetime
 st.set_page_config(
     page_title="Coopératives & Agroécologie",
     page_icon="🌾",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# ---------- CUSTOM CSS FOR SPINNING SYMBOLS ----------
-def spinning_css():
+# ---------- CUSTOM CSS FOR VIBRANT COLORS ----------
+def get_colorful_css():
     return """
     <style>
+    /* Global background gradient */
+    .stApp {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e9f5e9 100%);
+    }
+    /* Login page container */
+    .login-container {
+        text-align: center;
+        background: linear-gradient(145deg, #fff8e7, #fceabb);
+        padding: 2.5rem;
+        border-radius: 60px;
+        box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+        max-width: 500px;
+        margin: 10% auto;
+        border: 2px solid #ffb347;
+    }
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
     @keyframes shine {
-        0% { opacity: 0.6; text-shadow: 0 0 5px gold; }
-        50% { opacity: 1; text-shadow: 0 0 20px orange; }
-        100% { opacity: 0.6; text-shadow: 0 0 5px gold; }
+        0% { opacity: 0.6; text-shadow: 0 0 2px gold; }
+        50% { opacity: 1; text-shadow: 0 0 20px orange, 0 0 5px yellow; }
+        100% { opacity: 0.6; text-shadow: 0 0 2px gold; }
+    }
+    @keyframes bounce {
+        0%,100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
     }
     .spinning-icon {
         animation: spin 4s linear infinite;
         display: inline-block;
-        font-size: 3rem;
+        font-size: 3.5rem;
+        margin: 0 10px;
     }
     .shining-text {
         animation: shine 2s ease-in-out infinite;
         font-weight: bold;
+        background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-size: 2.2rem;
     }
-    .login-container {
-        text-align: center;
-        margin-top: 15%;
+    .bouncing-icon {
+        animation: bounce 1.5s infinite;
+        display: inline-block;
+        font-size: 2rem;
     }
+    /* Colorful button */
+    div.stButton > button {
+        background: linear-gradient(90deg, #ff8c00, #ff2e00);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 0.6rem 1.8rem;
+        font-weight: bold;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transition: 0.3s;
+    }
+    div.stButton > button:hover {
+        transform: scale(1.02);
+        background: linear-gradient(90deg, #ff9f2e, #ff4411);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    /* Sidebar customization */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #2c3e2f, #1e3b2a);
+        border-right: 3px solid #f39c12;
+    }
+    [data-testid="stSidebar"] * {
+        color: #ffffff !important;
+    }
+    .sidebar-content {
+        background-color: rgba(0,0,0,0.2);
+        padding: 1rem;
+        border-radius: 20px;
+    }
+    /* Lesson expander headers */
+    .streamlit-expanderHeader {
+        background: linear-gradient(95deg, #ffecd2, #fcb69f);
+        border-radius: 30px;
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: #2d2d2d !important;
+        border: 1px solid #ffaa44;
+    }
+    .streamlit-expanderHeader:hover {
+        background: linear-gradient(95deg, #ffe0b5, #ffa559);
+    }
+    /* Lesson content card */
+    .lesson-card {
+        background: rgba(255,255,240,0.95);
+        border-radius: 30px;
+        padding: 1rem;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+    /* Footer */
     .footer {
         text-align: center;
         margin-top: 3rem;
         padding: 1rem;
-        border-top: 1px solid #ccc;
-        font-size: 0.8rem;
+        background: linear-gradient(90deg, #2ecc71, #27ae60);
+        border-radius: 30px;
+        color: white;
+        font-weight: bold;
     }
     </style>
     """
@@ -52,29 +132,33 @@ def check_password():
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
     if not st.session_state.authenticated:
-        st.markdown(spinning_css(), unsafe_allow_html=True)
+        st.markdown(get_colorful_css(), unsafe_allow_html=True)
         st.markdown('<div class="login-container">', unsafe_allow_html=True)
-        st.markdown('<div class="spinning-icon">🌾🍎🥕🌽</div>', unsafe_allow_html=True)
-        st.markdown("<h1 class='shining-text'>🌱 COOPÉRATIVES & AGROÉCOLOGIE 🌱</h1>", unsafe_allow_html=True)
-        st.markdown("<h3>Built by Gesner / GlobalInternet.py</h3>", unsafe_allow_html=True)
-        password = st.text_input("Enter Password", type="password")
+        st.markdown("""
+            <div>
+                <span class="spinning-icon">🌾</span>
+                <span class="spinning-icon">🍎</span>
+                <span class="spinning-icon">🥕</span>
+                <span class="spinning-icon">🌽</span>
+            </div>
+            <h1 class="shining-text">🌱 COOPÉRATIVES & AGROÉCOLOGIE 🌱</h1>
+            <p style="font-size:1.2rem;">Built by <strong>Gesner Deslandes</strong> / GlobalInternet.py</p>
+            <p style="font-size:1rem;">🍅 Enter the password to access the 20‑day farming training 🧑‍🌾</p>
+        """, unsafe_allow_html=True)
+        password = st.text_input("🔐 Password", type="password", key="login_pass")
         col1, col2, col3 = st.columns([1,2,1])
         with col2:
-            if st.button("🔓 Unlock the Farm", use_container_width=True):
+            if st.button("🌻 Unlock the Farm 🌻", use_container_width=True):
                 if password == PASSWORD:
                     st.session_state.authenticated = True
                     st.rerun()
                 else:
-                    st.error("Incorrect password. Access denied.")
+                    st.error("❌ Incorrect password. Access denied.")
         st.markdown('</div>', unsafe_allow_html=True)
         return False
     return True
 
-# ---------- LESSONS DATA (20 days) ----------
-# Each lesson: title, text, image_url (free online)
-# We'll use relevant images from Unsplash (via placeholder images or direct URLs)
-# For reliability, use free image APIs or Pixabay; here we use Unsplash random but fixed URLs.
-
+# ---------- LESSONS DATA (same as before) ----------
 lessons = {
     1: {
         "title": "Day 1: Introduction to Agroecology",
@@ -180,13 +264,11 @@ lessons = {
 
 # ---------- AUDIO FUNCTION (TTS) ----------
 def text_to_speech_button(text, lang_code, button_label="🔊 Listen"):
-    # Use browser speech synthesis via HTML/JS
-    # lang_code: 'en', 'fr', 'es'
     lang_map = {'en': 'en-US', 'fr': 'fr-FR', 'es': 'es-ES'}
     tts_lang = lang_map.get(lang_code, 'en-US')
     safe_text = text.replace("'", "\\'").replace('"', '\\"')
     html = f"""
-    <button id="ttsBtn" style="background-color:#4CAF50; border:none; border-radius:20px; padding:8px 16px; margin:5px; cursor:pointer;">{button_label}</button>
+    <button id="ttsBtn" style="background-color:#ffaa44; border:none; border-radius:30px; padding:8px 18px; margin:5px; cursor:pointer; font-weight:bold; color:#2c2c2c;">{button_label}</button>
     <script>
     (function() {{
         const btn = document.getElementById('ttsBtn');
@@ -204,9 +286,9 @@ def text_to_speech_button(text, lang_code, button_label="🔊 Listen"):
 
 # ---------- MAIN APP ----------
 def main_app():
-    st.markdown(spinning_css(), unsafe_allow_html=True)
+    st.markdown(get_colorful_css(), unsafe_allow_html=True)
 
-    # Language selection at top
+    # Language selection
     lang = st.selectbox("🌐 Language / Idioma / Langue", ["English", "Français", "Español"], index=0)
     if lang == "English":
         lang_code = "en"
@@ -230,36 +312,36 @@ def main_app():
     st.title(welcome)
     st.markdown("---")
 
-    # Sidebar with info and logout
+    # Sidebar
     with st.sidebar:
-        st.markdown("### 👨‍💻 **Gesner Deslandes**")
-        st.markdown("**Chief Engineer at GlobalInternet.py**")
-        st.markdown("🌍 We build softwares on demand")
+        st.markdown("## 🌟 **Gesner Deslandes**")
+        st.markdown("👨‍💻 *Chief Engineer at GlobalInternet.py*")
+        st.markdown("🌍 **We build softwares on demand**")
         st.markdown("---")
-        st.markdown("#### 🌱 Training Summary")
-        st.markdown("20 lessons covering agroecology, cooperatives, soil, water, certification, and more.")
+        st.markdown("#### 📚 Training Summary")
+        st.markdown("20 lessons covering:")
+        st.markdown("✅ Agroecology\n✅ Soil & Water\n✅ Cooperatives\n✅ Certification\n✅ Pest Management\n✅ Post‑harvest\n✅ Agroforestry\n✅ Climate resilience\n✅ Exchange visits (Laos)\n✅ Local food systems")
+        st.markdown("---")
+        st.markdown("🔊 *Each lesson includes text, image, and audio*")
         st.markdown("---")
         if st.button(logout_btn, use_container_width=True):
             st.session_state.authenticated = False
             st.rerun()
 
-    # Main content: display all lessons (Day 1 to 20) as expandable sections?
-    # But requirement: "display each day writing a text with audio and image" – we can show all days in order.
-    # We'll use st.expander for each day to keep page manageable.
+    # Display lessons in colorful expanders
     for day in range(1, 21):
         lesson = lessons[day]
         with st.expander(f"📖 {day_prefix} {day}: {lesson['title']}"):
             col1, col2 = st.columns([2, 1])
             with col1:
-                st.markdown(f"**{lesson['title']}**")
+                st.markdown(f"<div class='lesson-card'><h3>{lesson['title']}</h3>", unsafe_allow_html=True)
                 st.write(lesson['text'])
-                # Audio button
                 audio_html = text_to_speech_button(lesson['text'], lang_code, listen_btn)
                 st.components.v1.html(audio_html, height=80)
+                st.markdown("</div>", unsafe_allow_html=True)
             with col2:
-                st.image(lesson['image'], use_container_width=True)
-    st.markdown("---")
-    st.markdown('<div class="footer">© GlobalInternet.py – Coopératives & Agroécologie – Training for sustainable farming</div>', unsafe_allow_html=True)
+                st.image(lesson['image'], use_container_width=True, caption=f"Day {day} illustration")
+    st.markdown('<div class="footer">© GlobalInternet.py – Coopératives & Agroécologie – Empowering farmers with sustainable knowledge</div>', unsafe_allow_html=True)
 
 # ---------- RUN ----------
 if check_password():

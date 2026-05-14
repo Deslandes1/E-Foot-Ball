@@ -1,146 +1,266 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
-import time
+import base64
+from datetime import datetime
 
-# --- PAGE CONFIGURATION ---
+# ---------- PAGE CONFIG ----------
 st.set_page_config(
-    page_title="E-FOOTBALL | Gesner Deslandes",
-    page_icon="⚽",
-    layout="centered"
+    page_title="Coopératives & Agroécologie",
+    page_icon="🌾",
+    layout="wide"
 )
 
-# --- ADVANCED CSS FOR GAMING UI ---
-st.markdown("""
+# ---------- CUSTOM CSS FOR SPINNING SYMBOLS ----------
+def spinning_css():
+    return """
     <style>
-    .stApp { background-color: #050a0e; }
-    .game-title { 
-        text-align: center; color: #FFD700; font-size: 50px; 
-        font-weight: 900; text-shadow: 0 0 30px #FF0000; margin-bottom: 0px;
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
-    .dev-credit { 
-        text-align: center; color: #00FF00; font-size: 20px; 
-        font-family: 'Courier New', monospace; font-weight: bold; margin-bottom: 20px;
+    @keyframes shine {
+        0% { opacity: 0.6; text-shadow: 0 0 5px gold; }
+        50% { opacity: 1; text-shadow: 0 0 20px orange; }
+        100% { opacity: 0.6; text-shadow: 0 0 5px gold; }
     }
-    .game-container {
-        display: flex; justify-content: center;
-        border: 4px solid #FFD700; border-radius: 20px;
-        background-color: #1a1a1a; padding: 5px;
-        box-shadow: 0 0 50px rgba(0, 255, 0, 0.2);
+    .spinning-icon {
+        animation: spin 4s linear infinite;
+        display: inline-block;
+        font-size: 3rem;
     }
-    /* Mobile-Friendly Button Styling */
-    .stButton>button {
-        width: 100%; height: 65px; font-size: 24px !important;
-        font-weight: 900 !important; border-radius: 15px !important;
-        background-color: #222 !important; color: gold !important;
-        border: 2px solid #FFD700 !important;
+    .shining-text {
+        animation: shine 2s ease-in-out infinite;
+        font-weight: bold;
     }
-    .stButton>button:active {
-        background-color: #FFD700 !important; color: black !important;
+    .login-container {
+        text-align: center;
+        margin-top: 15%;
+    }
+    .footer {
+        text-align: center;
+        margin-top: 3rem;
+        padding: 1rem;
+        border-top: 1px solid #ccc;
+        font-size: 0.8rem;
     }
     </style>
-    """, unsafe_allow_html=True)
+    """
 
-# --- SESSION STATE INITIALIZATION ---
-if 'player_x' not in st.session_state:
-    st.session_state.player_x = 250
-if 'player_y' not in st.session_state:
-    st.session_state.player_y = 150
-if 'score' not in st.session_state:
-    st.session_state.score = 0
+# ---------- AUTHENTICATION ----------
+PASSWORD = "20082010"
 
-# --- GAME LOGIC FUNCTIONS ---
-def move_player(direction):
-    step = 25
-    if direction == "UP" and st.session_state.player_y > 30:
-        st.session_state.player_y -= step
-    if direction == "DOWN" and st.session_state.player_y < 270:
-        st.session_state.player_y += step
-    if direction == "LEFT" and st.session_state.player_x > 30:
-        st.session_state.player_x -= step
-    if direction == "RIGHT" and st.session_state.player_x < 470:
-        st.session_state.player_x += step
-    
-    # --- GOAL DETECTION LOGIC ---
-    # Detects if player enters the Golden Goal zone
-    if st.session_state.player_x > 440 and 110 < st.session_state.player_y < 190:
-        st.session_state.score += 1
-        st.session_state.player_x = 250  
-        st.session_state.player_y = 150
-        st.balloons()
+def check_password():
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
+    if not st.session_state.authenticated:
+        st.markdown(spinning_css(), unsafe_allow_html=True)
+        st.markdown('<div class="login-container">', unsafe_allow_html=True)
+        st.markdown('<div class="spinning-icon">🌾🍎🥕🌽</div>', unsafe_allow_html=True)
+        st.markdown("<h1 class='shining-text'>🌱 COOPÉRATIVES & AGROÉCOLOGIE 🌱</h1>", unsafe_allow_html=True)
+        st.markdown("<h3>Built by Gesner / GlobalInternet.py</h3>", unsafe_allow_html=True)
+        password = st.text_input("Enter Password", type="password")
+        col1, col2, col3 = st.columns([1,2,1])
+        with col2:
+            if st.button("🔓 Unlock the Farm", use_container_width=True):
+                if password == PASSWORD:
+                    st.session_state.authenticated = True
+                    st.rerun()
+                else:
+                    st.error("Incorrect password. Access denied.")
+        st.markdown('</div>', unsafe_allow_html=True)
+        return False
+    return True
 
-# --- THE HD VISUAL PITCH (SVG) ---
-pitch_svg = f"""
-<svg width="100%" height="auto" viewBox="0 0 500 300" style="border-radius: 15px;">
-    <defs>
-        <linearGradient id="grass" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#2ecc71;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#27ae60;stop-opacity:1" />
-        </linearGradient>
-        <radialGradient id="playerGlow">
-            <stop offset="10%" style="stop-color:#ffffff;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#0000FF;stop-opacity:1" />
-        </radialGradient>
-    </defs>
+# ---------- LESSONS DATA (20 days) ----------
+# Each lesson: title, text, image_url (free online)
+# We'll use relevant images from Unsplash (via placeholder images or direct URLs)
+# For reliability, use free image APIs or Pixabay; here we use Unsplash random but fixed URLs.
 
-    <!-- Pitch Grass -->
-    <rect width="500" height="300" fill="url(#grass)" />
-    
-    <!-- White Markings -->
-    <line x1="250" y1="0" x2="250" y2="300" stroke="rgba(255,255,255,0.7)" stroke-width="3" />
-    <circle cx="250" cy="150" r="45" stroke="rgba(255,255,255,0.7)" stroke-width="3" fill="none" />
-    
-    <!-- Penalty Boxes -->
-    <rect x="0" y="75" width="60" height="150" stroke="white" stroke-width="2" fill="rgba(255,255,255,0.1)" />
-    <rect x="440" y="75" width="60" height="150" stroke="white" stroke-width="2" fill="rgba(255,255,255,0.1)" />
-    
-    <!-- GOLDEN GOAL POST -->
-    <rect x="490" y="115" width="10" height="70" fill="#FFD700" rx="3">
-        <animate attributeName="opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite" />
-    </rect>
+lessons = {
+    1: {
+        "title": "Day 1: Introduction to Agroecology",
+        "text": "Agroecology is a holistic approach that applies ecological principles to agriculture. It aims to create sustainable, productive, and resilient farming systems. Instead of relying on chemical inputs, agroecology works with nature: building healthy soils, encouraging biodiversity, and integrating crops and livestock. By mimicking natural ecosystems, farmers can reduce costs, protect the environment, and produce healthy food. Agroecology also respects local knowledge and empowers farmers to become innovators. This first day sets the foundation for our 20‑day journey into regenerative farming.",
+        "image": "https://images.pexels.com/photos/164504/pexels-photo-164504.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    2: {
+        "title": "Day 2: The Importance of Soil Health",
+        "text": "Healthy soil is the living, breathing foundation of any farm. It is not just dirt – it is a complex ecosystem of microorganisms, fungi, earthworms, and organic matter. Good soil structure allows water to infiltrate, roots to grow deep, and nutrients to cycle naturally. Practices like cover cropping, reduced tillage, and adding compost rebuild soil organic matter. Soil health directly affects crop resilience, yields, and nutritional quality. Today we learn how to assess your soil and simple ways to improve it without expensive chemicals.",
+        "image": "https://images.pexels.com/photos/247405/pexels-photo-247405.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    3: {
+        "title": "Day 3: Water Management and Weather Importance",
+        "text": "Water is life, but too much or too little can destroy crops. Understanding local weather patterns – rainfall, droughts, storms – is crucial for planning. Techniques like rainwater harvesting, drip irrigation, mulching, and contour farming help capture and use water efficiently. Weather forecasting tools and simple on‑farm weather stations allow farmers to make timely decisions. Sanitation around water sources prevents contamination. Today we explore how to manage water wisely in the face of climate variability.",
+        "image": "https://images.pexels.com/photos/292114/pexels-photo-292114.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    4: {
+        "title": "Day 4: Reducing Chemical Inputs – Natural Alternatives",
+        "text": "Chemical fertilizers and pesticides can harm soil life, pollinators, and human health. There are many natural alternatives: compost tea, neem oil, beneficial insects, and crop rotation. By observing your fields regularly, you can identify problems early and use targeted organic solutions. This lesson presents a step‑by‑step guide to transition away from synthetic inputs, starting with one field or crop. Small changes lead to big benefits for your wallet and the environment.",
+        "image": "https://images.pexels.com/photos/1264320/pexels-photo-1264320.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    5: {
+        "title": "Day 5: Crop Rotation and Diversity",
+        "text": "Growing the same crop year after year depletes nutrients and invites pests. Crop rotation means changing the plant family in each field every season. For example, follow a nitrogen‑fixing legume with a heavy feeder like corn. Intercropping (mixing crops) also reduces pest outbreaks and improves soil health. Diversity creates resilience. Today we design a simple rotation plan for a small garden and learn why polycultures outperform monocultures.",
+        "image": "https://images.pexels.com/photos/101708/pexels-photo-101708.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    6: {
+        "title": "Day 6: Composting and Organic Fertilizers",
+        "text": "Compost turns farm waste into black gold. Anything that once lived – plant residues, manure, kitchen scraps – can be composted. A good compost pile balances greens (nitrogen) and browns (carbon), with enough moisture and air. After a few months, you get a rich, earthy fertilizer that feeds soil microbes. We also explore other organic fertilizers like worm castings, green manure, and biochar. This lesson teaches how to build a simple compost heap and use it effectively.",
+        "image": "https://images.pexels.com/photos/5849561/pexels-photo-5849561.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    7: {
+        "title": "Day 7: Pest Management without Pesticides",
+        "text": "Integrated Pest Management (IPM) uses observation, prevention, and natural controls. Start by encouraging beneficial insects (ladybugs, lacewings) by planting flowers. Use physical barriers like nets or traps. When needed, apply botanical sprays (neem, garlic) that break down quickly. Rotate crops and remove infested plants. This approach reduces pesticide resistance and protects pollinators. Today we identify common garden pests and their natural enemies.",
+        "image": "https://images.pexels.com/photos/79621/pexels-photo-79621.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    8: {
+        "title": "Day 8: The Role of Cooperatives in Agriculture",
+        "text": "Individual farmers often struggle to access markets, get fair prices, or buy inputs cheaply. Cooperatives – groups of farmers who work together – solve these problems. They pool resources, share knowledge, and negotiate better deals. In Laos and Cambodia, cooperatives have helped members increase incomes and adopt sustainable practices. Today we learn how to start or join a cooperative: rules, benefits, and success stories from the field.",
+        "image": "https://images.pexels.com/photos/6646839/pexels-photo-6646839.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    9: {
+        "title": "Day 9: Certification and Market Access",
+        "text": "Certification schemes (organic, fair trade, Rainforest Alliance) help farmers prove their products are sustainable. They open doors to premium markets and build consumer trust. However, certification can be expensive. Group certification for cooperatives reduces costs. This lesson explains the steps to get certified, the documents needed, and how to find buyers who value sustainability. Case studies from Southeast Asia show how certification changed farmers' lives.",
+        "image": "https://images.pexels.com/photos/4488638/pexels-photo-4488638.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    10: {
+        "title": "Day 10: Post-Harvest Handling and Sanitation",
+        "text": "After harvest, fruits and vegetables continue to breathe. Poor handling leads to rot and waste. Sanitation is key: clean storage areas, wash hands, use clean water, and separate produce from soil. Techniques like curing, cooling, and proper packaging extend shelf life. This lesson covers simple low‑cost methods to reduce post‑harvest losses, improve food safety, and increase profits. Good hygiene also prevents foodborne illnesses.",
+        "image": "https://images.pexels.com/photos/6210278/pexels-photo-6210278.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    11: {
+        "title": "Day 11: Seed Saving and Biodiversity",
+        "text": "Saving your own seeds saves money and adapts crops to your local conditions. Choose open‑pollinated varieties, not hybrids. Learn how to harvest, dry, and store seeds properly. Seed banks and farmer networks preserve genetic diversity. This lesson explains how to save seeds from common vegetables like tomatoes, beans, and squash. Biodiversity in the field also means planting heirloom varieties that resist diseases naturally.",
+        "image": "https://images.pexels.com/photos/789658/pexels-photo-789658.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    12: {
+        "title": "Day 12: Agroforestry and Tree Integration",
+        "text": "Agroforestry combines trees with crops or livestock. Trees provide shade, windbreaks, fruits, timber, and improve soil fertility through leaf litter. They also sequester carbon. In tropical countries, alley cropping with fast‑growing trees like gliricidia enriches the soil. This lesson introduces different agroforestry systems and how to choose the right trees for your farm. We also see examples from Laos where agroforestry restored degraded land.",
+        "image": "https://images.pexels.com/photos/247478/pexels-photo-247478.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    13: {
+        "title": "Day 13: Climate-Resilient Farming",
+        "text": "Climate change brings more extreme weather: droughts, floods, heatwaves. Resilient farms adapt by diversifying crops, improving water storage, using drought‑tolerant varieties, and building healthy soil that holds moisture. Agroecological practices like mulching, windbreaks, and contour farming reduce risks. Today we explore a checklist to assess your farm's vulnerability and a toolkit of resilience strategies that have worked in Cambodia and Laos.",
+        "image": "https://images.pexels.com/photos/1301856/pexels-photo-1301856.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    14: {
+        "title": "Day 14: Small-Scale Irrigation Techniques",
+        "text": "Not every farm has a river. Small‑scale irrigation can be as simple as a bucket and a hose, or more advanced like drip kits. Rainwater harvesting from roofs, small ponds, or underground tanks provides water during dry spells. Solar pumps are becoming affordable. This lesson compares different low‑cost irrigation methods, their water efficiency, and how to maintain them. We also discuss water sanitation to avoid algal growth.",
+        "image": "https://images.pexels.com/photos/1081483/pexels-photo-1081483.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    15: {
+        "title": "Day 15: Livestock Integration in Agroecology",
+        "text": "Animals and crops work better together. Chickens eat pests and provide manure; pigs can be rotated on crop residues; cattle graze cover crops. Integrating livestock recycles nutrients, reduces waste, and creates multiple income streams. However, it requires careful management to prevent overgrazing and water contamination. Today we learn rotational grazing, manure composting, and how to design a mixed farm using the Cambodian experience.",
+        "image": "https://images.pexels.com/photos/2487312/pexels-photo-2487312.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    16: {
+        "title": "Day 16: Women and Youth in Agriculture",
+        "text": "Women and young people are vital to the future of farming, but they often lack access to land, credit, and training. Empowering them with leadership roles in cooperatives and decision‑making increases productivity and family well‑being. This lesson showcases successful projects from Laos where women‑led vegetable gardens and youth agri‑entrepreneurship transformed communities. We discuss practical steps to make agriculture more inclusive.",
+        "image": "https://images.pexels.com/photos/1423607/pexels-photo-1423607.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    17: {
+        "title": "Day 17: Policy and Support for Farmers",
+        "text": "Government policies can help or hinder sustainable agriculture. Subsidies for chemicals, trade agreements, and land tenure laws all affect farmers. This lesson guides you on how to advocate for supportive policies – joining farmer networks, participating in consultations, and using media. We also present examples of successful policy changes in Southeast Asia that promoted agroecology and cooperative development.",
+        "image": "https://images.pexels.com/photos/6750745/pexels-photo-6750745.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    18: {
+        "title": "Day 18: Learning from Others – Exchange Visits (Laos Example)",
+        "text": "Visiting other farms and countries opens your mind. A recent exchange from Cambodia to Laos (March 31 – April 5, 2026) taught four key lessons: (1) Agroecology works in practice; (2) Certification opens markets; (3) Cooperatives bring fairer incomes; (4) Cross‑learning builds lasting networks. Today we dive into these lessons and how you can organize your own exchange visits, even locally, to boost innovation.",
+        "image": "https://images.pexels.com/photos/129115/pexels-photo-129115.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    19: {
+        "title": "Day 19: Building a Local Food System",
+        "text": "Shortening the distance from farm to fork reduces emissions and keeps money in the community. Local food systems include farmers’ markets, community‑supported agriculture (CSA), school feeding programs, and farm‑to‑restaurant partnerships. This lesson explains how to map your local food actors, create a brand, and use social media to sell directly. We also cover food safety regulations and storytelling to attract customers.",
+        "image": "https://images.pexels.com/photos/618776/pexels-photo-618776.jpeg?auto=compress&cs=tinysrgb&w=600"
+    },
+    20: {
+        "title": "Day 20: The Future of Farming – Technology and Tradition",
+        "text": "The best agriculture marries ancient wisdom with modern tools. Drones, soil sensors, mobile apps for weather, and blockchains for traceability can complement traditional knowledge. But technology is only a tool; the heart remains the farmer’s connection to land and community. On this final day, we reflect on the 20‑day journey and encourage you to pick one new practice to implement. A sustainable future is built step by step, together.",
+        "image": "https://images.pexels.com/photos/3873696/pexels-photo-3873696.jpeg?auto=compress&cs=tinysrgb&w=600"
+    }
+}
 
-    <!-- THE PLAYER (NO. 10) -->
-    <circle cx="{st.session_state.player_x}" cy="{st.session_state.player_y}" r="15" fill="url(#playerGlow)" stroke="#FFD700" stroke-width="3" />
-    <text x="{st.session_state.player_x - 7}" y="{st.session_state.player_y + 5}" fill="white" font-size="14" font-family="Arial Black" font-weight="900">10</text>
-    
-    <!-- Signature inside graphic -->
-    <text x="10" y="290" fill="rgba(255,255,255,0.4)" font-size="10" font-family="monospace">GLOBALINTERNET.PY FOOTBALL ENGINE</text>
-</svg>
-"""
+# ---------- AUDIO FUNCTION (TTS) ----------
+def text_to_speech_button(text, lang_code, button_label="🔊 Listen"):
+    # Use browser speech synthesis via HTML/JS
+    # lang_code: 'en', 'fr', 'es'
+    lang_map = {'en': 'en-US', 'fr': 'fr-FR', 'es': 'es-ES'}
+    tts_lang = lang_map.get(lang_code, 'en-US')
+    safe_text = text.replace("'", "\\'").replace('"', '\\"')
+    html = f"""
+    <button id="ttsBtn" style="background-color:#4CAF50; border:none; border-radius:20px; padding:8px 16px; margin:5px; cursor:pointer;">{button_label}</button>
+    <script>
+    (function() {{
+        const btn = document.getElementById('ttsBtn');
+        if (!btn) return;
+        btn.onclick = function() {{
+            let utterance = new SpeechSynthesisUtterance("{safe_text}");
+            utterance.lang = "{tts_lang}";
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        }};
+    }})();
+    </script>
+    """
+    return html
 
-st.markdown(f'<div class="game-container">{pitch_svg}</div>', unsafe_allow_html=True)
+# ---------- MAIN APP ----------
+def main_app():
+    st.markdown(spinning_css(), unsafe_allow_html=True)
 
-# --- SCOREBOARD ---
-col_sc1, col_sc2 = st.columns(2)
-with col_sc1:
-    st.markdown("<h2 style='text-align:right; color:white; margin-top:10px;'>MATCH SCORE:</h2>", unsafe_allow_html=True)
-with col_sc2:
-    st.markdown(f"<h2 style='text-align:left; color:#FFD700; margin-top:10px;'>{st.session_state.score}</h2>", unsafe_allow_html=True)
+    # Language selection at top
+    lang = st.selectbox("🌐 Language / Idioma / Langue", ["English", "Français", "Español"], index=0)
+    if lang == "English":
+        lang_code = "en"
+        welcome = "🌾 COOPÉRATIVES & AGROÉCOLOGIE – 20‑Day Training Book 🌾"
+        day_prefix = "Day"
+        listen_btn = "🔊 Listen to this lesson"
+        logout_btn = "🚪 Logout"
+    elif lang == "Français":
+        lang_code = "fr"
+        welcome = "🌾 COOPÉRATIVES & AGROÉCOLOGIE – Livre de formation en 20 jours 🌾"
+        day_prefix = "Jour"
+        listen_btn = "🔊 Écouter cette leçon"
+        logout_btn = "🚪 Déconnexion"
+    else:
+        lang_code = "es"
+        welcome = "🌾 COOPÉRATIVES & AGROÉCOLOGIE – Libro de capacitación de 20 días 🌾"
+        day_prefix = "Día"
+        listen_btn = "🔊 Escuchar esta lección"
+        logout_btn = "🚪 Cerrar sesión"
 
-# --- CONTROLS ---
-st.markdown("<br>", unsafe_allow_html=True)
-c_up, c_res = st.columns([2, 1])
-with c_up:
-    if st.button("🔼 UP"): move_player("UP")
-with c_res:
-    if st.button("🔄 RESET"): 
-        st.session_state.score = 0
-        st.session_state.player_x = 250
-        st.session_state.player_y = 150
+    st.title(welcome)
+    st.markdown("---")
 
-c_l, c_d, c_r = st.columns(3)
-with c_l:
-    if st.button("◀️ LEFT"): move_player("LEFT")
-with c_d:
-    if st.button("🔽 DOWN"): move_player("DOWN")
-with c_r:
-    if st.button("▶️ RIGHT"): move_player("RIGHT")
+    # Sidebar with info and logout
+    with st.sidebar:
+        st.markdown("### 👨‍💻 **Gesner Deslandes**")
+        st.markdown("**Chief Engineer at GlobalInternet.py**")
+        st.markdown("🌍 We build softwares on demand")
+        st.markdown("---")
+        st.markdown("#### 🌱 Training Summary")
+        st.markdown("20 lessons covering agroecology, cooperatives, soil, water, certification, and more.")
+        st.markdown("---")
+        if st.button(logout_btn, use_container_width=True):
+            st.session_state.authenticated = False
+            st.rerun()
 
-# --- FOOTER ---
-st.markdown("<br><hr>", unsafe_allow_html=True)
-st.markdown("""
-    <div style="text-align:center; color: #888; font-family:monospace;">
-        © 2026 GLOBALINTERNET.PY | DESIGNED BY GESNER DESLANDES<br>
-        <b>OPTIMIZED FOR CROSS-PLATFORM PERFORMANCE</b>
-    </div>
-    """, unsafe_allow_html=True)
+    # Main content: display all lessons (Day 1 to 20) as expandable sections?
+    # But requirement: "display each day writing a text with audio and image" – we can show all days in order.
+    # We'll use st.expander for each day to keep page manageable.
+    for day in range(1, 21):
+        lesson = lessons[day]
+        with st.expander(f"📖 {day_prefix} {day}: {lesson['title']}"):
+            col1, col2 = st.columns([2, 1])
+            with col1:
+                st.markdown(f"**{lesson['title']}**")
+                st.write(lesson['text'])
+                # Audio button
+                audio_html = text_to_speech_button(lesson['text'], lang_code, listen_btn)
+                st.components.v1.html(audio_html, height=80)
+            with col2:
+                st.image(lesson['image'], use_container_width=True)
+    st.markdown("---")
+    st.markdown('<div class="footer">© GlobalInternet.py – Coopératives & Agroécologie – Training for sustainable farming</div>', unsafe_allow_html=True)
+
+# ---------- RUN ----------
+if check_password():
+    main_app()
